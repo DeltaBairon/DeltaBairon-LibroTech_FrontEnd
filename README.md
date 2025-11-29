@@ -1,3 +1,12 @@
+![CSS3](https://img.shields.io/badge/CSS3-Styling-blue?logo=css3)
+![CSS](https://img.shields.io/badge/CSS-3-1572B6?logo=css3)
+![Flexbox](https://img.shields.io/badge/Flexbox-Layout-1572B6?logo=css3)
+![Grid](https://img.shields.io/badge/Grid-Layout-1572B6?logo=css3)
+![Responsive](https://img.shields.io/badge/Responsive-Mobile%20First-blueviolet?logo=css3)
+![SASS](https://img.shields.io/badge/SASS-Preprocessor-pink?logo=sass)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwindcss)
+
 # 📚 LibroTech - Sistema de Gestión de Librería
 Sistema frontend completo para gestión de librería con operaciones CRUD para Libros, Autores, Categorías y Editoriales.
 
@@ -139,3 +148,4 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
