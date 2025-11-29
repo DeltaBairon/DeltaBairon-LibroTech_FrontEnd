@@ -31,6 +31,8 @@ Sistema frontend completo para gestión de librería con operaciones CRUD para L
 - ✅ Animaciones fluidas
 
 ## 📁 Estructura del Proyecto
+
+```
 libreria-frontend/
 │
 ├── index.html          # Página principal
@@ -41,6 +43,7 @@ libreria-frontend/
 │
 └── js/
     └── app.js          # Lógica de la aplicación
+```
 
 ## 🛠️ Instalación
 1. Crear la estructura de carpetas:
@@ -158,6 +161,7 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
 
 
 
