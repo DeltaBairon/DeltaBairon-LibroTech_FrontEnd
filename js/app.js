@@ -1,38 +1,18 @@
 // ========== CONFIGURACIÓN API ==========
-const API_URL = 'http://localhost:3000/api'; // Cambiar según tu configuración
+const API_URL = 'http://localhost:4000'; // Cambiar según tu configuración
 
-// ========== DATOS LOCALES (mientras no esté la API) ==========
+// ========== DATOS LOCALES (cache temporal) ==========
 let datos = {
-    libros: [
-        { id: 1, titulo: 'Cien años de soledad', autor_id: 1, categoria_id: 1, editorial_id: 1, precio: 29.99, stock: 45, isbn: '978-0307474728', año: 1967 },
-        { id: 2, titulo: '1984', autor_id: 2, categoria_id: 2, editorial_id: 2, precio: 19.99, stock: 32, isbn: '978-0451524935', año: 1949 },
-        { id: 3, titulo: 'El principito', autor_id: 3, categoria_id: 3, editorial_id: 3, precio: 15.99, stock: 78, isbn: '978-0156012195', año: 1943 },
-        { id: 4, titulo: 'Don Quijote de la Mancha', autor_id: 4, categoria_id: 4, editorial_id: 1, precio: 35.99, stock: 25, isbn: '978-8420412146', año: 1605 },
-        { id: 5, titulo: 'Rayuela', autor_id: 5, categoria_id: 1, editorial_id: 1, precio: 24.99, stock: 18, isbn: '978-8437604572', año: 1963 },
-    ],
-    autores: [
-        { id: 1, nombre: 'Gabriel García Márquez', pais: 'Colombia', fecha_nacimiento: '1927-03-06', biografia: 'Premio Nobel de Literatura 1982' },
-        { id: 2, nombre: 'George Orwell', pais: 'Reino Unido', fecha_nacimiento: '1903-06-25', biografia: 'Autor de obras distópicas' },
-        { id: 3, nombre: 'Antoine de Saint-Exupéry', pais: 'Francia', fecha_nacimiento: '1900-06-29', biografia: 'Escritor y aviador francés' },
-        { id: 4, nombre: 'Miguel de Cervantes', pais: 'España', fecha_nacimiento: '1547-09-29', biografia: 'Máximo exponente de la literatura española' },
-        { id: 5, nombre: 'Julio Cortázar', pais: 'Argentina', fecha_nacimiento: '1914-08-26', biografia: 'Maestro del relato corto' },
-    ],
-    categorias: [
-        { id: 1, nombre: 'Realismo Mágico', descripcion: 'Literatura con elementos fantásticos en contextos realistas' },
-        { id: 2, nombre: 'Distopía', descripcion: 'Sociedades futuristas opresivas y totalitarias' },
-        { id: 3, nombre: 'Infantil', descripcion: 'Literatura dirigida al público infantil y juvenil' },
-        { id: 4, nombre: 'Clásicos', descripcion: 'Obras fundamentales de la literatura universal' },
-    ],
-    editoriales: [
-        { id: 1, nombre: 'Sudamericana', pais: 'Argentina', fundacion: 1939, direccion: 'Buenos Aires' },
-        { id: 2, nombre: 'Debolsillo', pais: 'España', fundacion: 1999, direccion: 'Barcelona' },
-        { id: 3, nombre: 'Salamandra', pais: 'España', fundacion: 1989, direccion: 'Madrid' },
-    ]
+    libros: [],
+    autores: [],
+    categorias: [],
+    editoriales: []
 };
 
 // ========== ESTADO DE LA APLICACIÓN ==========
 let currentSection = 'dashboard';
 let currentModal = { type: '', mode: '', id: null };
+let isLoading = false;
 
 // ========== ELEMENTOS DOM ==========
 const sidebar = document.getElementById('sidebar');
@@ -51,12 +31,98 @@ const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 
 // ========== INICIALIZACIÓN ==========
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Iniciando aplicación...');
+    console.log('📡 API URL:', API_URL);
+    
     initNavigation();
     initSearch();
-    renderAll();
-    updateStats();
+    
+    try {
+        await cargarDatosIniciales();
+        console.log('✅ Datos cargados exitosamente');
+    } catch (error) {
+        console.error('❌ Error al cargar datos iniciales:', error);
+        showToast('Error al conectar con el servidor. Verifica que la API esté corriendo.', 'error');
+    }
 });
+
+// ========== FUNCIONES API ==========
+async function fetchAPI(endpoint, options = {}) {
+    const url = `${API_URL}${endpoint}`;
+    console.log(`📤 ${options.method || 'GET'} ${url}`);
+    
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            ...options
+        });
+
+        console.log(`📥 Respuesta: ${response.status} ${response.statusText}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Error en respuesta:', errorText);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Datos recibidos:', data);
+        return data;
+        
+    } catch (error) {
+        console.error('❌ Error en fetchAPI:', error);
+        
+        if (error.message.includes('Failed to fetch')) {
+            throw new Error('No se pudo conectar con el servidor. Verifica que esté corriendo en ' + API_URL);
+        }
+        
+        throw error;
+    }
+}
+
+async function cargarDatosIniciales() {
+    if (isLoading) return;
+    isLoading = true;
+    
+    console.log('📥 Cargando datos iniciales...');
+    showToast('Cargando datos...', 'info');
+    
+    try {
+        // Cargar cada recurso por separado para mejor debugging
+        console.log('📚 Cargando libros...');
+        const libros = await fetchAPI('/libros');
+        datos.libros = libros;
+        
+        console.log('✍️ Cargando autores...');
+        const autores = await fetchAPI('/autores');
+        datos.autores = autores;
+        
+        console.log('📁 Cargando categorías...');
+        const categorias = await fetchAPI('/categorias');
+        datos.categorias = categorias;
+        
+        console.log('🏢 Cargando editoriales...');
+        const editoriales = await fetchAPI('/editoriales');
+        datos.editoriales = editoriales;
+
+        console.log('✅ Todos los datos cargados:', datos);
+        
+        renderAll();
+        updateStats();
+        showToast('Datos cargados correctamente', 'success');
+        
+    } catch (error) {
+        console.error('❌ Error al cargar datos:', error);
+        showToast(error.message, 'error');
+        throw error;
+    } finally {
+        isLoading = false;
+    }
+}
 
 // ========== NAVEGACIÓN ==========
 function initNavigation() {
@@ -95,6 +161,8 @@ function initSearch() {
 function filterCurrentSection(term) {
     if (currentSection === 'dashboard') return;
     const tableBody = document.getElementById(`${currentSection}Table`);
+    if (!tableBody) return;
+    
     const rows = tableBody.querySelectorAll('tr');
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
@@ -104,6 +172,7 @@ function filterCurrentSection(term) {
 
 // ========== RENDERIZADO ==========
 function renderAll() {
+    console.log('🎨 Renderizando todas las secciones...');
     renderLibros();
     renderAutores();
     renderCategorias();
@@ -113,6 +182,15 @@ function renderAll() {
 
 function renderLibros() {
     const tbody = document.getElementById('librosTable');
+    if (!tbody) return;
+    
+    console.log('📚 Renderizando libros:', datos.libros.length);
+    
+    if (datos.libros.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No hay libros registrados</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = datos.libros.map(libro => {
         const autor = datos.autores.find(a => a.id === libro.autor_id);
         const categoria = datos.categorias.find(c => c.id === libro.categoria_id);
@@ -124,8 +202,8 @@ function renderLibros() {
                 <td>${autor?.nombre || 'N/A'}</td>
                 <td>${categoria?.nombre || 'N/A'}</td>
                 <td>${editorial?.nombre || 'N/A'}</td>
-                <td>$${libro.precio.toFixed(2)}</td>
-                <td>${libro.stock}</td>
+                <td>$${parseFloat(libro.precio || 0).toFixed(2)}</td>
+                <td>${libro.stock || 0}</td>
                 <td>
                     <div class="table-actions">
                         <button class="btn-icon edit" onclick="openModal('libros', 'edit', ${libro.id})" title="Editar">
@@ -149,12 +227,31 @@ function renderLibros() {
 
 function renderAutores() {
     const tbody = document.getElementById('autoresTable');
-    tbody.innerHTML = datos.autores.map(autor => `
+    if (!tbody) return;
+    
+    if (datos.autores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No hay autores registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = datos.autores.map(autor => {
+        // Formatear fecha para mostrar
+        let fechaMostrar = 'N/A';
+        if (autor.fecha_nacimiento) {
+            const fecha = new Date(autor.fecha_nacimiento + 'T00:00:00');
+            fechaMostrar = fecha.toLocaleDateString('es-ES', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        }
+        
+        return `
         <tr>
             <td>${autor.id}</td>
             <td><strong>${autor.nombre}</strong></td>
-            <td>${autor.pais}</td>
-            <td>${autor.fecha_nacimiento}</td>
+            <td>${autor.pais || 'N/A'}</td>
+            <td>${fechaMostrar}</td>
             <td>
                 <div class="table-actions">
                     <button class="btn-icon edit" onclick="openModal('autores', 'edit', ${autor.id})">
@@ -172,16 +269,24 @@ function renderAutores() {
                 </div>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderCategorias() {
     const tbody = document.getElementById('categoriasTable');
+    if (!tbody) return;
+    
+    if (datos.categorias.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No hay categorías registradas</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = datos.categorias.map(cat => `
         <tr>
             <td>${cat.id}</td>
             <td><strong>${cat.nombre}</strong></td>
-            <td>${cat.descripcion}</td>
+            <td>${cat.descripcion || 'N/A'}</td>
             <td>
                 <div class="table-actions">
                     <button class="btn-icon edit" onclick="openModal('categorias', 'edit', ${cat.id})">
@@ -204,12 +309,19 @@ function renderCategorias() {
 
 function renderEditoriales() {
     const tbody = document.getElementById('editorialesTable');
+    if (!tbody) return;
+    
+    if (datos.editoriales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No hay editoriales registradas</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = datos.editoriales.map(ed => `
         <tr>
             <td>${ed.id}</td>
             <td><strong>${ed.nombre}</strong></td>
-            <td>${ed.pais}</td>
-            <td>${ed.fundacion}</td>
+            <td>${ed.pais || 'N/A'}</td>
+            <td>${ed.fundacion || 'N/A'}</td>
             <td>
                 <div class="table-actions">
                     <button class="btn-icon edit" onclick="openModal('editoriales', 'edit', ${ed.id})">
@@ -232,7 +344,15 @@ function renderEditoriales() {
 
 function renderRecentBooks() {
     const container = document.getElementById('recentBooks');
+    if (!container) return;
+    
     const recent = datos.libros.slice(-5).reverse();
+    
+    if (recent.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No hay libros registrados</p>';
+        return;
+    }
+    
     container.innerHTML = recent.map(libro => {
         const autor = datos.autores.find(a => a.id === libro.autor_id);
         return `
@@ -249,7 +369,7 @@ function renderRecentBooks() {
                         <p>${autor?.nombre || 'Autor desconocido'}</p>
                     </div>
                 </div>
-                <span class="recent-item-price">$${libro.precio.toFixed(2)}</span>
+                <span class="recent-item-price">$${parseFloat(libro.precio || 0).toFixed(2)}</span>
             </div>
         `;
     }).join('');
@@ -264,6 +384,7 @@ function updateStats() {
 
 // ========== MODALES ==========
 function openModal(type, mode, id = null) {
+    console.log(`🔧 Abriendo modal: ${mode} ${type}`, id);
     currentModal = { type, mode, id };
     modalTitle.textContent = mode === 'create' ? `Nuevo ${getSingular(type)}` : `Editar ${getSingular(type)}`;
     modalBody.innerHTML = getFormHTML(type, mode, id);
@@ -294,14 +415,14 @@ function getFormHTML(type, mode, id) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Autor</label>
-                        <select id="form-autor_id">
+                        <select id="form-autor_id" required>
                             <option value="">Seleccionar autor</option>
                             ${datos.autores.map(a => `<option value="${a.id}" ${item?.autor_id === a.id ? 'selected' : ''}>${a.nombre}</option>`).join('')}
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Categoría</label>
-                        <select id="form-categoria_id">
+                        <select id="form-categoria_id" required>
                             <option value="">Seleccionar categoría</option>
                             ${datos.categorias.map(c => `<option value="${c.id}" ${item?.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('')}
                         </select>
@@ -309,7 +430,7 @@ function getFormHTML(type, mode, id) {
                 </div>
                 <div class="form-group">
                     <label>Editorial</label>
-                    <select id="form-editorial_id">
+                    <select id="form-editorial_id" required>
                         <option value="">Seleccionar editorial</option>
                         ${datos.editoriales.map(e => `<option value="${e.id}" ${item?.editorial_id === e.id ? 'selected' : ''}>${e.nombre}</option>`).join('')}
                     </select>
@@ -317,11 +438,11 @@ function getFormHTML(type, mode, id) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Precio ($)</label>
-                        <input type="number" step="0.01" id="form-precio" value="${item?.precio || ''}">
+                        <input type="number" step="0.01" id="form-precio" value="${item?.precio || ''}" required>
                     </div>
                     <div class="form-group">
                         <label>Stock</label>
-                        <input type="number" id="form-stock" value="${item?.stock || ''}">
+                        <input type="number" id="form-stock" value="${item?.stock || ''}" required>
                     </div>
                 </div>
                 <div class="form-row">
@@ -336,6 +457,15 @@ function getFormHTML(type, mode, id) {
                 </div>
             `;
         case 'autores':
+            // Convertir fecha de YYYY-MM-DD a formato que acepta input type="date"
+            let fechaParaInput = '';
+            if (item?.fecha_nacimiento) {
+                // Si viene como YYYY-MM-DD, usarla directamente
+                if (item.fecha_nacimiento.includes('-')) {
+                    fechaParaInput = item.fecha_nacimiento.split('T')[0]; // Quitar la parte de hora si existe
+                }
+            }
+            
             return `
                 <div class="form-group">
                     <label>Nombre completo</label>
@@ -348,7 +478,7 @@ function getFormHTML(type, mode, id) {
                     </div>
                     <div class="form-group">
                         <label>Fecha de nacimiento</label>
-                        <input type="date" id="form-fecha_nacimiento" value="${item?.fecha_nacimiento || ''}">
+                        <input type="date" id="form-fecha_nacimiento" value="${fechaParaInput}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -394,14 +524,32 @@ function getFormHTML(type, mode, id) {
 }
 
 // ========== CRUD OPERATIONS ==========
-function handleSubmit() {
+async function handleSubmit() {
     const { type, mode, id } = currentModal;
-    const formData = getFormData(type);
     
-    if (mode === 'create') {
-        createItem(type, formData);
-    } else {
-        updateItem(type, id, formData);
+    console.log(`💾 Guardando: ${mode} ${type}`, id);
+    
+    const formData = getFormData(type);
+    console.log('📝 Datos del formulario:', formData);
+    
+    // Validar campos requeridos
+    if (!formData.titulo && type === 'libros') {
+        showToast('El título es requerido', 'error');
+        return;
+    }
+    if (!formData.nombre && type !== 'libros') {
+        showToast('El nombre es requerido', 'error');
+        return;
+    }
+    
+    try {
+        if (mode === 'create') {
+            await createItem(type, formData);
+        } else {
+            await updateItem(type, id, formData);
+        }
+    } catch (error) {
+        console.error('❌ Error en handleSubmit:', error);
     }
 }
 
@@ -411,45 +559,80 @@ function getFormData(type) {
     inputs.forEach(input => {
         const key = input.id.replace('form-', '');
         let value = input.value;
-        if (input.type === 'number') value = parseFloat(value) || 0;
-        if (key.includes('_id')) value = parseInt(value) || null;
-        data[key] = value;
+        
+        // Convertir tipos de datos
+        if (input.type === 'number') {
+            value = value ? parseFloat(value) : null;
+        }
+        if (key.includes('_id') && value) {
+            value = parseInt(value);
+        }
+        
+        // Las fechas ya vienen en formato correcto YYYY-MM-DD desde input type="date"
+        // No hacer conversión adicional
+        
+        // Solo incluir el campo si tiene valor (excepto para números que pueden ser 0)
+        if (value !== '' && value !== null) {
+            data[key] = value;
+        }
     });
     return data;
 }
 
-function createItem(type, data) {
-    // Generar nuevo ID
-    const maxId = Math.max(...datos[type].map(i => i.id), 0);
-    data.id = maxId + 1;
-    
-    // Agregar a datos locales
-    datos[type].push(data);
-    
-    // TODO: Llamar a la API
-    // await fetch(`${API_URL}/${type}`, { method: 'POST', body: JSON.stringify(data) });
-    
-    closeModal();
-    renderAll();
-    updateStats();
-    showToast(`${getSingular(type)} creado exitosamente`, 'success');
+async function createItem(type, data) {
+    try {
+        console.log(`➕ Creando ${type}:`, data);
+        
+        const newItem = await fetchAPI(`/${type}`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        console.log('✅ Item creado:', newItem);
+
+        // Actualizar cache local
+        datos[type].push(newItem);
+        
+        closeModal();
+        renderAll();
+        updateStats();
+        showToast(`${getSingular(type)} creado exitosamente`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Error al crear:', error);
+        showToast(`Error al crear ${getSingular(type).toLowerCase()}: ${error.message}`, 'error');
+    }
 }
 
-function updateItem(type, id, data) {
-    const index = datos[type].findIndex(i => i.id === id);
-    if (index !== -1) {
-        datos[type][index] = { ...datos[type][index], ...data };
+async function updateItem(type, id, data) {
+    try {
+        console.log(`✏️ Actualizando ${type} ${id}:`, data);
+        
+        const updatedItem = await fetchAPI(`/${type}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+
+        console.log('✅ Item actualizado:', updatedItem);
+
+        // Actualizar cache local
+        const index = datos[type].findIndex(i => i.id === id);
+        if (index !== -1) {
+            datos[type][index] = { ...datos[type][index], ...updatedItem };
+        }
+        
+        closeModal();
+        renderAll();
+        showToast(`${getSingular(type)} actualizado exitosamente`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Error al actualizar:', error);
+        showToast(`Error al actualizar ${getSingular(type).toLowerCase()}: ${error.message}`, 'error');
     }
-    
-    // TODO: Llamar a la API
-    // await fetch(`${API_URL}/${type}/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-    
-    closeModal();
-    renderAll();
-    showToast(`${getSingular(type)} actualizado exitosamente`, 'success');
 }
 
 function openDeleteModal(type, id) {
+    console.log(`🗑️ Abriendo modal de eliminación: ${type} ${id}`);
     currentModal = { type, mode: 'delete', id };
     deleteModalOverlay.classList.add('active');
     confirmDeleteBtn.onclick = () => deleteItem(type, id);
@@ -459,20 +642,33 @@ function closeDeleteModal() {
     deleteModalOverlay.classList.remove('active');
 }
 
-function deleteItem(type, id) {
-    datos[type] = datos[type].filter(i => i.id !== id);
-    
-    // TODO: Llamar a la API
-    // await fetch(`${API_URL}/${type}/${id}`, { method: 'DELETE' });
-    
-    closeDeleteModal();
-    renderAll();
-    updateStats();
-    showToast(`${getSingular(type)} eliminado exitosamente`, 'success');
+async function deleteItem(type, id) {
+    try {
+        console.log(`🗑️ Eliminando ${type} ${id}`);
+        
+        await fetchAPI(`/${type}/${id}`, {
+            method: 'DELETE'
+        });
+
+        console.log('✅ Item eliminado');
+
+        // Actualizar cache local
+        datos[type] = datos[type].filter(i => i.id !== id);
+        
+        closeDeleteModal();
+        renderAll();
+        updateStats();
+        showToast(`${getSingular(type)} eliminado exitosamente`, 'success');
+        
+    } catch (error) {
+        console.error('❌ Error al eliminar:', error);
+        showToast(`Error al eliminar ${getSingular(type).toLowerCase()}: ${error.message}`, 'error');
+    }
 }
 
 // ========== TOAST NOTIFICATIONS ==========
 function showToast(message, type = 'success') {
+    console.log(`📢 Toast [${type}]: ${message}`);
     toastMessage.textContent = message;
     toast.className = `toast show ${type}`;
     setTimeout(() => {
