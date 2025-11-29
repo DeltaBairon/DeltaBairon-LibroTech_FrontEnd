@@ -3,9 +3,7 @@
 ![Flexbox](https://img.shields.io/badge/Flexbox-Layout-1572B6?logo=css3)
 ![Grid](https://img.shields.io/badge/Grid-Layout-1572B6?logo=css3)
 ![Responsive](https://img.shields.io/badge/Responsive-Mobile%20First-blueviolet?logo=css3)
-![SASS](https://img.shields.io/badge/SASS-Preprocessor-pink?logo=sass)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap)
-![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwindcss)
 ![VSCode](https://img.shields.io/badge/VS%20Code-Editor-blue?logo=visualstudiocode)
 ![Extensions](https://img.shields.io/badge/Extensions-Enabled-007ACC?logo=visualstudiocode)
 ![Intellisense](https://img.shields.io/badge/IntelliSense-Active-0078D4?logo=visualstudiocode)
@@ -161,6 +159,7 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
 
 
 
