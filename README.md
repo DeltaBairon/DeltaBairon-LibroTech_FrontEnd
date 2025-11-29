@@ -6,7 +6,6 @@
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap)
 ![VSCode](https://img.shields.io/badge/VS%20Code-Editor-blue?logo=visualstudiocode)
 ![Extensions](https://img.shields.io/badge/Extensions-Enabled-007ACC?logo=visualstudiocode)
-![Intellisense](https://img.shields.io/badge/IntelliSense-Active-0078D4?logo=visualstudiocode)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.9%2B-blue?logo=typescript)
 ![ECMAScript](https://img.shields.io/badge/ECMAScript-Modern-F7DF1E?logo=javascript)
@@ -159,6 +158,7 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
 
 
 
