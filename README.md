@@ -138,12 +138,16 @@ CREATE TABLE libros (
 );
 
 ## 🎨 Personalización
+
 Cambiar colores principales:
+```css
 :root {
     --cyan-500: #06b6d4;
     --blue-600: #2563eb;
     --bg-primary: #0a0e1a;
 }
+```
+
 
 ## 📱 Responsive
 - Desktop (> 1200px)
@@ -161,6 +165,7 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
 
 
 
