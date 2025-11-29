@@ -1,14 +1,11 @@
 ![CSS3](https://img.shields.io/badge/CSS3-Styling-blue?logo=css3)
 ![CSS](https://img.shields.io/badge/CSS-3-1572B6?logo=css3)
 ![Flexbox](https://img.shields.io/badge/Flexbox-Layout-1572B6?logo=css3)
-![Grid](https://img.shields.io/badge/Grid-Layout-1572B6?logo=css3)
 ![Responsive](https://img.shields.io/badge/Responsive-Mobile%20First-blueviolet?logo=css3)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap)
 ![VSCode](https://img.shields.io/badge/VS%20Code-Editor-blue?logo=visualstudiocode)
 ![Extensions](https://img.shields.io/badge/Extensions-Enabled-007ACC?logo=visualstudiocode)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript)
-![TypeScript](https://img.shields.io/badge/TypeScript-4.9%2B-blue?logo=typescript)
-![ECMAScript](https://img.shields.io/badge/ECMAScript-Modern-F7DF1E?logo=javascript)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=nodedotjs)
 ![Express](https://img.shields.io/badge/Express-Framework-black?logo=express)
 ![NPM](https://img.shields.io/badge/NPM-Package%20Manager-red?logo=npm)
@@ -165,6 +162,7 @@ Cambiar colores principales:
 MIT License - Libre para uso personal y comercial.
 
 Desarrollado con ❤️ para tu proyecto de librería
+
 
 
 
